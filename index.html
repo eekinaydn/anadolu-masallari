@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anadolu'nun Büyülü Masalları | Sözlü Bellek Arşivi</title>
+
+  <style>
+    /* ==========================================================================
+       0. YEREL YAZI TİPİ TANIMI (KiwiSoda)
+       İnternetsiz çalışma gereksinimi için fonts/ klasöründen çekilir.
+       ========================================================================== */
+    @font-face {
+      font-family: 'KiwiSoda';
+      src: url('fonts/KiwiSoda.ttf') format('truetype'),
+           url('fonts/KiwiSoda.otf') format('opentype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    /* ==========================================================================
+       1. GÖKYÜZÜ & PEMBE-LEYLAK PALETİ (CSS DEĞİŞKENLERİ)
+       ========================================================================== */
+    :root {
+      --night-skies: #000181;       /* Arka Plan */
+      --blue-raspberry: #006EE9;    /* Butonlar & Vurgu Etiketleri */
+      --sunny-skies: #83E7FF;       /* Çerçeve Işıltıları & İkincil Metin */
+      --violet: #E8A0FF;            /* Kart Çerçeveleri & Rozetler */
+      --powdered-lime: #D0FFA4;     /* Başlıklar & Masal Numaraları */
+
+      --card-bg-pink: #f7dfff;      /* Açık Leylak/Pembe Kart Zemini */
+      --card-text-dark: #120042;    /* Pembe zemin üzeri koyu mor okuma metni */
+      --card-text-muted: #3b2866;   /* İkincil özet metin rengi */
+
+      --radius: 18px;
+      --transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--night-skies);
+      color: #FFFFFF;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      /* Masalsı gökyüzü nebulaları */
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(131, 231, 255, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 85% 30%, rgba(232, 160, 255, 0.18) 0%, transparent 40%),
+        radial-gradient(circle at 50% 85%, rgba(0, 110, 233, 0.25) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* ==========================================================================
+       2. ÜST BİLGİ ALANI (HEADER)
+       ========================================================================== */
+    header {
+      text-align: center;
+      padding: 60px 20px 40px;
+      border-bottom: 1px solid rgba(131, 231, 255, 0.25);
+    }
+
+    .badge-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(232, 160, 255, 0.15);
+      border: 1.5px solid var(--violet);
+      color: var(--violet);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 30px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 15px rgba(232, 160, 255, 0.3);
+    }
+
+    header h1 {
+      font-family: 'KiwiSoda', Georgia, sans-serif;
+      font-size: clamp(40px, 6vw, 62px);
+      font-weight: normal;
+      color: var(--powdered-lime);
+      text-shadow: 0 0 20px rgba(208, 255, 164, 0.35);
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    header p {
+      max-width: 540px;
+      margin: 0 auto;
+      color: var(--sunny-skies);
+      font-size: 16px;
+    }
+
+    /* ==========================================================================
+       3. KONTROL PANELİ (ARAMA & FİLTRELER)
+       ========================================================================== */
+    main {
+      flex: 1;
+      max-width: 1220px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 22px 60px;
+    }
+
+    .controls-panel {
+      max-width: 620px;
+      margin: 0 auto 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 15px 22px;
+      background: rgba(0, 1, 129, 0.7);
+      border: 2px solid var(--violet);
+      border-radius: 35px;
+      color: #FFFFFF;
+      font-size: 15.5px;
+      outline: none;
+      backdrop-filter: blur(8px);
+      transition: var(--transition);
+    }
+
+    #searchInput::placeholder {
+      color: rgba(232, 160, 255, 0.7);
+    }
+
+    #searchInput:focus {
+      border-color: var(--sunny-skies);
+      box-shadow: 0 0 20px rgba(131, 231, 255, 0.45);
+    }
+
+    .filter-tags {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: rgba(0, 110, 233, 0.25);
+      border: 1.5px solid var(--sunny-skies);
+      color: var(--sunny-skies);
+      padding: 7px 16px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: var(--transition);
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--violet);
+      border-color: var(--violet);
+      color: var(--card-text-dark);
+      box-shadow: 0 0 16px rgba(232, 160, 255, 0.6);
+    }
+
+    /* ==========================================================================
+       4. MASAL KARTLARI (GRID & KART DÜZENİ)
+       ========================================================================== */
+    .story-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 26px;
+    }
+
+    .story-card {
+      background: var(--card-bg-pink);
+      color: var(--card-text-dark);
+      border: 2px solid var(--violet);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), 0 0 20px rgba(232, 160, 255, 0.2);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .story-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--sunny-skies);
+      box-shadow: 0 18px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(131, 231, 255, 0.5);
+    }
+
+    .story-card:focus-visible {
+      outline: 3px solid var(--powdered-lime);
+      outline-offset: 4px;
+    }
+
+    .card-img-container {
+      width: 100%;
+      height: 190px;
+      background: #00024d;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 2px solid var(--violet);
+    }
+
+    .card-img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+      display: block;
+    }
+
+    .story-card:hover .card-img-container img {
+      transform: scale(1.08);
+    }
+
+    .card-tag {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--night-skies);
+      border: 1px solid var(--sunny-skies);
+      color: var(--sunny-skies);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-content {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .card-no {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--blue-raspberry);
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+    }
+
+    .card-content h3 {
+      font-family: 'KiwiSoda', Georgia, sans-serif;
+      font-size: 24px;
+      color: var(--card-text-dark);
+      margin-bottom: 10px;
+      line-height: 1.35;
+    }
+
+    .card-excerpt {
+      font-size: 13.5px;
+      color: var(--card-text-muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
+      flex: 1;
+    }
+
+    .card-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--blue-raspberry);
+      margin-top: auto;
+      transition: var(--transition);
+    }
+
+    .story-card:hover .card-action {
+      color: #000181;
+      transform: translateX(5px);
+    }
+
+    #noResults {
+      display: none;
+      text-align: center;
+      padding: 50px 20px;
+      font-size: 17px;
+      color: var(--violet);
+    }
+
+    /* ==========================================================================
+       5. OKUMA PENCERESİ (MODAL DIALOG)
+       ========================================================================== */
+    dialog#readerDialog {
+      width: min(780px, calc(100% - 32px));
+      max-height: 85vh;
+      margin: auto;
+      border: 3px solid var(--violet);
+      border-radius: 20px;
+      background: var(--card-bg-pink);
+      color: var(--card-text-dark);
+      box-shadow: 0 0 50px rgba(232, 160, 255, 0.45), 0 20px 60px rgba(0, 0, 0, 0.85);
+      overflow-y: auto;
+      padding: 0;
+    }
+
+    dialog#readerDialog::backdrop {
+      background: rgba(0, 1, 70, 0.85);
+      backdrop-filter: blur(8px);
+    }
+
+    .reader-header {
+      position: relative;
+      height: 250px;
+      background-color: #000181;
+      border-bottom: 2px solid var(--violet);
+    }
+
+    .reader-header img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .dialog-close-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      background: var(--night-skies);
+      border: 1.5px solid var(--sunny-skies);
+      color: var(--sunny-skies);
+      border-radius: 50%;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: var(--transition);
+      z-index: 5;
+    }
+
+    .dialog-close-btn:hover {
+      background: var(--violet);
+      color: var(--night-skies);
+      transform: scale(1.1);
+    }
+
+    .reader-body {
+      padding: 32px 35px 40px;
+    }
+
+    .reader-meta-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .reader-genre {
+      background: var(--night-skies);
+      border: 1px solid var(--violet);
+      color: var(--violet);
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 14px;
+    }
+
+    .reader-body h2 {
+      font-family: 'KiwiSoda', Georgia, serif;
+      font-size: clamp(26px, 4vw, 36px);
+      color: var(--card-text-dark);
+      margin-bottom: 20px;
+    }
+
+    .reader-text {
+      font-size: 16.5px;
+      line-height: 1.9;
+      color: #1a083d;
+      margin-bottom: 28px;
+      white-space: pre-line;
+      max-width: 68ch;
+    }
+
+    /* ==========================================================================
+       6. KAYNAKÇA & ALT BİLGİ (FOOTER)
+       ========================================================================== */
+    .reference-section {
+      background: rgba(0, 1, 129, 0.7);
+      border-top: 1px solid rgba(131, 231, 255, 0.2);
+      border-bottom: 1px solid rgba(131, 231, 255, 0.2);
+      padding: 45px 20px;
+    }
+
+    .reference-inner {
+      max-width: 950px;
+      margin: 0 auto;
+    }
+
+    .reference-inner h2 {
+      font-family: 'KiwiSoda', Georgia, serif;
+      font-size: 26px;
+      color: var(--powdered-lime);
+      margin-bottom: 16px;
+    }
+
+    .ref-list {
+      list-style-type: decimal;
+      list-style-position: inside;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.85);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .ref-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-left: 5px;
+    }
+
+    .ref-desc {
+      color: var(--sunny-skies);
+      font-size: 13px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 28px 20px;
+      background: #000154;
+      font-size: 13.5px;
+      color: var(--sunny-skies);
+      border-top: 1px solid rgba(131, 231, 255, 0.1);
+      font-style: italic;
+    }
+
+    @media (max-width: 640px) {
+      .reader-body { padding: 22px 18px; }
+      .reader-header { height: 180px; }
+      header { padding: 45px 16px 30px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Üst Bilgi Başlığı -->
+  <header>
+    <div class="badge-eyebrow">✦ Geceye Fısıldanan Masallar ✦</div>
+    <h1>Bir Varmış Bir Yokmuş</h1>
+    <p>Karanlık göklerin altında parıldayan 8 kadim masal.</p>
+  </header>
+
+  <main>
+    <!-- Arama ve Filtreleme Kontrolleri -->
+    <section class="controls-panel" aria-label="Arama ve Filtreleme">
+      <div class="search-wrapper">
+        <input
+          type="search"
+          id="searchInput"
+          placeholder="Yıldızların arasında masal ara..."
+          aria-label="Masallarda ara"
+        >
+      </div>
+
+      <div class="filter-tags" id="genreFilters">
+        <button class="filter-btn active" data-filter="all">Tüm Masallar</button>
+        <button class="filter-btn" data-filter="Olağanüstü">Olağanüstü</button>
+        <button class="filter-btn" data-filter="Hayvan Masalı">Hayvan Masalı</button>
+        <button class="filter-btn" data-filter="Gerçekçi Masal">Gerçekçi</button>
+      </div>
+    </section>
+
+    <!-- 8 Masal Kartının Listelendiği Grid Alanı -->
+    <section class="story-grid" id="storyGrid" aria-label="Masal Listesi">
+      <!-- JavaScript tarafından dinamik oluşturulur -->
+    </section>
+
+    <p id="noResults">Aradığınız yıldız haritasında bir masal parıldamadı.</p>
+  </main>
+
+  <!-- Masal Okuma Penceresi (Dialog) -->
+  <dialog id="readerDialog">
+    <div class="reader-header">
+      <button class="dialog-close-btn" id="closeDialogBtn" aria-label="Kapat">&times;</button>
+      <img id="modalImg" src="" alt="Masal Görseli">
+    </div>
+    <div class="reader-body">
+      <div class="reader-meta-bar">
+        <span class="reader-genre" id="modalGenre">Tür</span>
+        <span class="card-no" id="modalNo">★ MASAL 01</span>
+      </div>
+      <h2 id="modalTitle">Masal Başlığı</h2>
+      <div class="reader-text" id="modalStoryContent"></div>
+    </div>
+  </dialog>
+
+  <!-- Kaynakça Bölümü -->
+  <section class="reference-section" id="kaynakca">
+    <div class="reference-inner">
+      <h2>Kaynakça</h2>
+      <ol class="ref-list">
+        <li class="ref-item">
+          <span>T.C. Kültür ve Turizm Bakanlığı. <em>Kütüphaneler ve Yayımlar Genel Müdürlüğü - E-Kitap Masallar Arşivi</em>.</span>
+          <span class="ref-desc">Kül Eşek, Mitişik Kız, Dürümcekli Kadın Masalı, Cihan Şah’a Söylenmeyen Sır ve Kaplumbağa Kabuğu</span>
+        </li>
+        <li class="ref-item">
+          <span>TÜMAK (Türkiye Masal Kültürü Arşivi / Araştırmaları).</span>
+          <span class="ref-desc">Tütüncü Kızı</span>
+        </li>
+        <li class="ref-item">
+          <span>Alangu, Tahir. (2020). <em>Billur Köşk Masalları</em>. İstanbul: Yapı Kredi Yayınları. (Halk Edebiyatı: 3)</span>
+          <span class="ref-desc">Tasa Kuşu</span>
+        </li>
+        <li class="ref-item">
+          <span>Tezel, Naki. (1971). <em>Türk Masalları</em>. İstanbul: Millî Eğitim Bakanlığı Yayınları. ("Sihirli Çeşme", ss. 436–441)</span>
+          <span class="ref-desc">Sihirli Çeşme</span>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <footer>
+    Bir varmış, hep var olsun; Anadolu’nun masalları nesilden nesile yaşamaya devam etsin.
+  </footer>
+
+  <!-- ==========================================================================
+       7. JAVASCRIPT: MASAL VERİLERİ VE ETKİLEŞİM MANTIĞI
+       ========================================================================== -->
+  <script>
+    const masallar = [
+      {
+        id: 1,
+        kod: "★ MASAL 01",
+        baslik: "Kül Eşek",
+        tur: "Olağanüstü",
+        ozet: "Kocakarının külden yaptığı eşeğe binip dağdaki yedi kardeşini arayan öksüz kızın ve devlerle yaşadığı zorlu sınavın masalı.",
+        metin: `Ne varmış, ne yokmuş... Vakti zamanında bir köyde bir kocakarı varmış. Eskiden çıkrık eğirirler, iplik bükerlermiş. Bu kocakarı da kızları çağırmış: "On tane kız gelsin bana iplik büksün."
+
+Neyse, kızlar iplik bükerlerken ne etmişlerse, hepsi yemin etmeğe başlamışlar: "Kardeşimin başı için.", "Babamın başı için..." Kızlardan biri hiç sesini çıkarmamış. Kocakarı ona sorunca: "Beşik dananın hatırası için benim haberim yok" demiş. Kocakarı: "Sen neden beşik danaya yemin ediyorsun? Senin yedi kardeşin var." Kız: "Ana ben görmemişim, benim haberim yok, öksüzüm. Yalnız evde oturuyorum, benim haberim yok nene." Kocakarı: "Oğul, falan mağarada senin yedi kardeşin var ve daima av kuş edip yiyorlar. Onların da senden haberi yok." Kız: "E... Nasıl edeyim de gidiyim?" Kocakarı: "Gel sana külden bir eşek yapayım, daima 'çö' de, 'çüş' deme; 'çüş' dedin mi hemen dağılır" demiş.
+
+Neyse, yapmış, binmiş gitmiş. "Çö, çö, çö" derken unutmuş arada bir de "çüş" demiş; eşek dağılmış. Geri dönmüş, kocakarı bir tane daha yapmış. Bu sefer unutmamış, aklına koymuş, gitmiş doğru mağaranın kapısına. Bakmış ki orada bir kedi içeride ekmekleri yalıyor, her tarafı birbirine katıyor. Oturuyor bakıyor ki bir babayiğit bıyığını büktü geldi: "Sen kimsin anam, neden geldin buraya?" Kız: "Ben senin bacınım, falan nene dedi ki senin kardeşlerin var, ben de geldim. Benim babamın adı Hasan, anamın adı Fatma." Ağabeyi sevinçle kucaklamış: "Kalk işimizi gör, öbür kardeşlerimiz de şimdi gelir."
+
+Akşam olunca o altı kardeş de gelmiş; yedi kardeş bacılarını çok sevmişler. O kedi kurtlanmış: "Bu nasıl iştir? Akşamları gelip beni seviyorlardı, şimdi bacılarına bakıyorlar." Kardeşler demişler ki: "Bacı, bu pisik bizim işimizi görüyordu, ikiniz iyi geçinin." O zamanda kibrit yokmuş; ateş söndürülemezmiş. Kız ateşe hedik koyup pisikle yukarı çıkmış. Pisik aşağı inip suyu dökerek ateşi söndürmüş. Kız aşağı inmiş ki ne pisik var ne ateş: "Oy ne olacak, kardeşlerim acından ölecekler!"
+
+Kız bakmış ki uzakta bir yerde bulgur haşlıyorlar, ateşler yanıyor. Oraya varmış ki bir dev, on iki tane de karısı var: "Ne olur biraz ateş verir misiniz?" Dev karıları: "Dev gelir bizi öldürür ama makasla ucundan biraz kesip verelim" demişler. Ateşi makasla kesip çaputun arasına koymuşlar. Kız üfüre üfüre koşarken ayağı taşa değip kanamış; gelip ateşi yakmış, yemeği pişirmiş. Dev ertesi gün insanoğlunun kokusunu alıp kızın kan izini sürerek mağaraya varmış: "Hu... Aç şu kapıyı seni yiyeceğim! Ya parmağını verirsin emeyim yahut seni yerim." Kız kapı deliğinden parmağını uzatmış, dev emmiş emmiş gitmiş. Günlerce parmağını emince kız sararıp solmuş. Durumu anlayan yedi kardeş pusu kurup devi öldürmüşler; devin karılarını ve mallarını almışlar.
+
+Fakat bu kadınlar kızı istemeyip su ibriğine mumar (yılan yavrusu) koymuşlar. Kız suyu içince karnı şişmiş; kadınlar kardeşlerine iftira atmışlar. Büyük kardeş kızı dağa götürüp ağaca bir tuluk ile balta asmış; rüzgâr estikçe tak tuk ses çıkarmış. Kız kardeşini ağaç kesiyor sanmış ama sabah bakmış ki yapayalnız kalmış: "Ayağına yılan kemiği batsın, benim elim değmedikçe çıkmasın" diye beddua etmiş. Kız karnı şiş bir halde köye inmiş; çeşme başında yatarken merhametli bir çiftçi kızın boğazından çıkan yılanı tutup atmış ve onunla evlenmiş. Yıllar sonra büyük kardeş ayağına batan yılan kemiğinin acısıyla hekim ararken bu köye gelmiş. Bacısı onu tanıyıp elini vurur vurmaz yılan kemiğini çıkarmış; bütün gerçekler anlaşılınca kucaklaşıp muratlarına ermişler.`,
+        gorsel: "images/image1.jpeg"
+      },
+      {
+        id: 2,
+        kod: "★ MASAL 02",
+        baslik: "Mitişik Kız",
+        tur: "Olağanüstü",
+        ozet: "Tuturuk toplamaya çıkan beş kızın dev anasının evine düşmesi ve uyanık Mitişik Kız'ın aklıyla devden kurtuluşu.",
+        metin: `Zamanın birinde, birbirleriyle arkadaş olan beş kız varmış. Bunlar her gün tuturuk (çalı çırpı) kazımaya giderlermiş. Bir gün kazıdıkları tuturukla evlerine dönerlerken yorulmuşlar, rastladıkları bir evin kapısını çalmışlar: "Teyze, bizi bu akşam misafir eder misin? Çok yorulduk da" demişler.
+
+Meğer orası bir dev anasının eviymiş. Kızları hemen içeri almış, yüzlerine gülmüş, rahat yataklar yapmış, karınlarını doyurmuş ve yatırmış. Maksadı, kızlar uyuyunca onları yemekmiş.
+
+Kızların içinde pek akıllı, pek kurnaz, Mitişik adında bir kız varmış. Devin maksadını sezmiş ve uyumamış. Dev dişlerini güzelce bilemiş, kızları yoklamaya gelmiş. Uyuyup uyumadıklarını anlamak için usulca seslenmiş: 
+"Kızlar, kim uyuyor, kim uyanık?" 
+"Mitişik kız uyanık." 
+"Kızım sen niye uyumadın?" deyince kız: 
+"Evde iken, anam bana her gün baklava, börek pişirir, onları yer, ondan sonra uyurdum" der.
+
+Dev anası, kız uyusun diye istediklerini yapar, önüne getirir. Mitişik kız da arkadaşlarını uyandırır, kendilerine güzel bir ziyafet çekerler ve gene yatarlar; fakat Mitişik kız yine uyumaz. Dev anası yine gelir, usulcana seslenir: 
+"Kızlar, kim uyuyor, kim uyanık?" 
+"Mitişik kız uyanık." 
+"Kızım sen niye uyumadın hâlâ?" 
+"Ben evde, baklava, böreği yedikten sonra, anam bana ırmaktan bir kalbur dolusu su getirir, onu içtikten sonra uyurdum" der.
+
+Dev anası çaresiz, bir kalbur alır, ırmağa su getirmeye gider. Kalburu suya daldırır, çıkarınca su deliklerden boşalırmış; kalburun deliklerine çamur sıvar, her yola başvurur, fakat bir türlü kalbura su dolduramazmış.
+
+O suyu doldura dursun, dev anası ırmağa gidince Mitişik kız arkadaşlarını uyandırır: "Aman kızlar, buradan kaçalım, dev anası bizi diri diri yiyecek" der. "Ama gitmeden önce şu dev anasına öyle bir oyun oynayalım ki, Mitişik kızı unutmasın." Bunun üzerine, tuturuk denklerinden birini evin ortasına yığarlar, kibriti çakarlar. Tuturuk otu çabuk ateş alan bir ot olduğu için birdenbire parlar, alevler volan volan yükselir, bir çırpıda evin her yanını kaplar.
+
+Kalbura bir türlü su dolduramayan dev anası yorulur, evin yolunu tutar. Bir de ne görsün, evi kül olmak üzere: "Ah Mitişik kız, vah Mitişik kız; böreğimi, baklavamı yedin doymadın, şimdi de evimi ateşlere yediriyorsun!" der. Öte yanda kızlar, fak (tuzak) kurarken faka basan devin hiddetini seyredip keyifleniyorlarmış. Yedik içtik murada geçtik.`,
+        gorsel: "images/image2.jpeg"
+      },
+      {
+        id: 3,
+        kod: "★ MASAL 03",
+        baslik: "Dürümcekli Kadın Masalı",
+        tur: "Hayvan Masalı",
+        ozet: "Kendine er arayan Kara Böcü ile Sıçan Süleyman Bey'in dere kenarında noktalanan ibretlik öyküsü.",
+        metin: `Bir varmış, bir yokmuş. Evvel zaman içinde, kalbur saman içinde, bir Kara Böcü (böcek) varmış. Bu böcü, aklına nerden esmişse esmiş, evlenmeye karar vermiş ve er aramaya çıkmış. Uzun süre gezmiş, dolaşmış, nihayet karşısına bir tilki çıkmış: "Merhaba Kara Böcü. Nereye gidiyorsun böyle kendi başına?"
+
+Bizim Kara Böcü'nün buna fena halde canı sıkılmış ve tilkiyi paylamış: "Halt etmişsin sen, ne diye Kara Böcü oluyum? Dürümcekli dürcen kadın, bürümcekli bürcen kadın, nere giden hay can kadın, desene" demiş. Tilki: "Pekâlâ, Dürümcekli dürcen kadın, bürümcekli bürcen kadın, nere giden hay can kadın?" Kara Böcü: "Er aramaya." Tilki: "Bana varır mısın?" Kara Böcü: "Sana varsam sen beni neyle döversin?" Tilki: "Tekmeyle, tekmeyle canını çıkartırım." Kara Böcü: "Haydi, öyleyse ben sana varmam" deyip tekrar yollara düşmüş.
+
+Az sonra karşısına parlak tüyleriyle pek güzel bir horoz çıkmış: "Nere gidiyorsun kara böcü?" "Halt etmişsin, Dürümcekli dürcen kadın, bürümcekli bürcen kadın, nere giden hay can kadın desen olmaz mı?" Horoz da öyle sormuş: "Bana varır mısın?" Kara Böcü: "Sana varsam beni ne ile döversin?" Horoz: "Dıktığımınan dıktığımınan (gagam ile) gözlerini oyarım." Kadın: "Haydi oradan, ben sana da varmam" diyerek yoluna devam etmiş.
+
+Bir süre sonra karşısına bu sefer de bir fare çıkmış: "Nere giden Kara Böcü?" Kadın yine paylamış; fare sorusunu düzeltmiş: "Dürümcekli dürcen kadın, bürümcekli bürcen kadın, nere giden hey can kadın?" "Er aramaya." "Bana varır mısın?" "Sana varırsam sen beni neyle döversin?" Fare cevap vermiş: "Kuyruğumunan kuyruğumunan gözüne sürme çekerim." Dürümcekli dürcen kadın buna pek sevinmiş: "Öyleyse, ben de sana varırım" demiş.
+
+İkisi de derenin kenarına oturmuşlar. Bu sırada canı sıkılan Sıçan Süleyman Bey: "Şurada bir bey konağı var. Ben oradan biraz şeker çalıp getireyim de beraber yiyelim" deyip yola çıkmış. Canı sıkılan kadın: "Bari biraz su içeyim" diye dereye eğilmiş ve "cupp" diye suya yuvarlanmış. Bir türlü derenin kenarına ulaşamamış.
+
+Bu sırada Bey'in konağına yiyecek götüren deve kervanları geçiyormuş. Kadın bağırmaya başlamış: "Deveci emmi, deveci emmi, Beyin konağına varırsan, sıçan Süleyman Beyi görürsen, dürümcekli dürcen kadın, bürümcekli bürcen kadın, suya düşmüş hay can kadın diyiverin." Deveciler sesi duymuş ama kimseyi görememişler. Konağa varınca durumu anlatmışlar: "Yahu yolda biri Sıçan Süleyman Bey diye bağırdı, kim bu?"
+
+O sırada mutfak dolabında şeker aşırmakla meşgul olan Sıçan Süleyman Bey şekerleri bırakıp derenin kenarına koşmuş: "Agel (al gel, uzat) ellerini dürümcekli dürcen kadın!" Ama kadın oralı olmamış: "Haydi, ben sana küskülü püsküllü!" Sıçan Süleyman Bey yalvarmış: "Canım, benim ne kabahatim vardı? Kendin düşmüşsün. Ellerini uzat da seni kurtarayım." Fakat kadın her seferinde "Ya! Ben sana küskülü püsküllü" diyormuş. Nihayet Sıçan Süleyman Bey'in sabrı taşmış. Bir değnek uzatarak kadını sudan çıkarmış ve: "Sen bana küskülü püsküllü isen, ben de sana depmeli depmeli!" diyerek oracıkta ezip atıvermiş.`,
+        gorsel: "images/image3.jpeg"
+      },
+      {
+        id: 4,
+        kod: "★ MASAL 04",
+        baslik: "Cihan Şah'a Söylenmeyen Sır",
+        tur: "Olağanüstü",
+        ozet: "Handaki resme aşık olan Cihanşah ile onu korumak uğruna taş kesilmeyi göze alan vezir oğlu Ahmetşah'ın dostluk ve fedakarlık masalı.",
+        metin: `Vakti zamanın birinde büyük bir diyarın padişahı vardı. Padişahın Cihanşah adında yüzü nurlu, içi sürurlu, dal gövdeli, güler yüzlü bir oğlu vardı. Cihanşah boş zamanlarında babasının vezirinin oğlu Ahmetşah ile buluşur; ava beraber gider, cirit oynar, ok atarlardı.
+
+İki arkadaş bir bahar günü uzak ülkelere gezmeye çıktılar. Vara vara heybetli bir hana indiler. Sabah kalkan Cihanşah duvara baktığında bir nevcivanın resmini gördü; gözleri ceylan, dudağı mercan bir afet... Hancıyı çağırıp sordu. Hancı: "Aman oğlum, bu kız Anlaş padişahının kızıdır. Ona göz koyayım deme, onun yüzünden nice canlar kurban, nice kanlar revan olmuştur" dedi. Cihanşah aldırmayıp Ahmetşah ile yola düştü.
+
+Şehre varıp saraya çıktılar. Cihanşah kızla konuştu; kız kötü bir rüya gördüğünü, rüyasında çocuklarının suda boğulduğunu ve bu yüzden asla evlenmeyeceğini söyledi. Cihanşah saraydan çıkıp erkek elbiselerini giydi ve meşhur bir nakkaş olarak sarayı nakışlamaya başladı. Haremlik kısmını nakışlarken kızla tekrar karşılaştı ve bayıldı. Ayılınca kıza aynı rüyayı gördüğünü söyledi. Kız: "Demek ki ikimizin mukadderatı birmiş" diyerek evlenmeyi kabul etti; üç gün üç gece düğün yapıldı.
+
+Gerdeğe girecekleri gece Ahmetşah, kıza aşık olan bir ejderhanın Cihanşah'ı öldüreceğini öğrendi. Karyolanın altına gizlenip ejderhayı öldürdü; ancak ejderhanın sihri sebebiyle bunu söylerse taş kesilecekti. Cihanşah sevgilisinin yüzündeki mercimek kadar kan lekesini görüp yatağın altındaki Ahmetşah'ı yakalayınca onu zindana attırdı.
+
+Ahmetşah zindanda padişahtan üç gün izin istedi ve bir kuşa fısıldayıp uçurdu. Kuş ağzında üç elma çekirdeğiyle döndü. Çekirdekler ekildi; üç yıl sonra meyve veren elmaları yiyen yaşlılar yirmi yaşında delikanlı gibi gençleştiler. Ancak bir elmaya zehir katılmıştı; Ahmetşah hileyi bozdu. Padişah huzurunda Ahmetşah: "Benim ricam şudur ki, Cihanşah'ın kızının kanını üzerime akıtırsanız tekrar hayata dönerim. Gidip karyolanın altına bakın, hikmeti ilahiyi görün" demesiyle baştan ayağa taş kesildi.
+
+Odaya koşanlar karyolanın altında büyük bir canavar leşi buldular; hepsi dehşete düştü ve Ahmetşah'ın günahsız olduğunu anladılar. Aradan bir sene geçti, Cihanşah'ın nur topu gibi bir kızı oldu. Ahmetşah'a verilen söz gereği kızın kanı taş bedene sürülünce Allah'ın lütfuyla taş gövdeye can geldi, Ahmetşah dirildi. Padişah Ahmetşah'ı vezir yaptı ve hepsi mesut yaşadılar.`,
+        gorsel: "images/image4.jpeg"
+      },
+      {
+        id: 5,
+        kod: "★ MASAL 05",
+        baslik: "Kaplumbağa Kabuğu",
+        tur: "Olağanüstü",
+        ozet: "Küçük şehzadenin nasibine düşen kaplumbağa kabuğundan çıkan peri kızı ve zalim babasının imkansız buyruklarıyla mücadelesi.",
+        metin: `Evvel evvel iken, deve tellâl, pire bakkal iken bir padişah ile üç oğlu varmış. Evlenme çağına gelince memleket âdeti gereği "cop" (kalın, kısa değnek) atmışlar. Cop kimin evine düşerse o kızı alırmış. Büyük oğlanın copu baş vezirin, ortancanınki küçük vezirin konağına düşmüş. Küçük oğlanın copu ise çeşme yanındaki kumluğa, bir kaplumbağa kabuğuna saplanmış. "Eh bu da bizim nasip" deyip kabuğu eve asmış.
+
+Akşam eve gelince bir de ne görsün? Ev tertemiz süpürülmüş, eşyalar yerli yerinde, yemekler enfes pişmiş. Üçüncü gün bir kocakarıya danışmış. Kocakarı gizlenmesini söylemiş. Oğlan gizlenip bakmış ki ayın on dördü gibi bir kız kabuktan çıkıp evi temizliyor. Kız kabuğa dönerken oğlan onu kucaklamış ve kabuğu ateşe atmış. Kız: "Yakma kabımı başın belâdan kurtulmaz!" diye üç kere haykırmışsa da dinlememiş.
+
+Sabah gelini gören padişahın aklı başından gitmiş; ona âşık olup oğlunu öldürmek için bahaneler aramış. Önce: "Annenin mezardaki altın yüzüğünü alıp geleceksin, yoksa başını vurdururum" demiş. Karısı oğlana çeşmeye gidip "Göden Kurbağası"ndan küçük kutuyu istemesini söylemiş. Oğlan kutuyu alıp mezarlığa gitmiş; kutuyu açınca mezarlar açılmış. Dünyada kimseye bir şey vermeyen aç, susuz, çıplak ruhların feryatları arasında yüzüğü alıp getirmiş.
+
+Padişah bu kez: "Devler ülkesindeki altın eyeri alıp geleceksin" demiş. Karısının tembihiyle oğlan yola çıkmış; kan ve irin akan çeşmeye "Ne güzel çeşme", meyvesi bol ağaca "Ne güzel armut", dev kapısına "Ne güzel kapı" diyerek eyeri alıp kaçmış. Devler "Tut kapım, tut armudum, tut çeşmem!" dediyse de onlar oğlana yolu açmışlar.
+
+Padişah son olarak: "Kış mevsiminde üzeri çiğli taze bir sepet üzüm getireceksin" demiş. Çeşmedeki kurbağanın yardımıyla üzüm de gelmiş. Padişahın hilesi kalmayınca gelin bütün ahaliyi meydana toplamış ve padişahın yaptığı kötülükleri bir bir yüzüne vurmuş: "Aha babalıcağım beline kadar taş ol!" Padişah beline kadar taş olmuş. "Aha boynuna kadar taş ol!" Boynuna kadar taş olmuş. "Aha başına kadar taş ol!" deyince padişah tamamen taş kesilmiş. Gelinle oğlan konaklarında mesut yaşamışlar. Gökten üç elma düştü; biri onlara, biri size, biri de kendime.`,
+        gorsel: "images/image5.jpeg"
+      },
+      {
+        id: 6,
+        kod: "★ MASAL 06",
+        baslik: "Tütüncü Kızı",
+        tur: "Gerçekçi Masal",
+        ozet: "Çarşı pazarın içinde yetişen zeki bir halk kızının vezirin çetin sorularını ve divandaki arazi davasını aklıyla çözüşü.",
+        metin: `Ülkenin birinde bir padişah yaşarmış. Bu padişahın avlanmayı çok seven bir oğlu varmış. Bu genç, her gün arkadaşlarıyla ava gider, akşama kadar avlanır, yorgun argın eve dönermiş. Günlerden bir gün padişahın oğlu evine dönerken bir tütün tarlasının yanından geçmiş. Bahçede çalışan tütüncü kızı görmüş:
+—Tütüncü kızı, tütüncü kızı, tütünün yaprağı kaç lira, demiş.
+Tütüncü kızı ise oğlanı görünce çok beğenmiş. Ona:
+— Al sana bir dal tere, Mevla’m seni bana vere, tütün almak istersen, bir yaprağı beş lira. Benimle evlenmek istersen, önce bana sor derim; ben seni senden değil, yüce Mevla’mdan isterim, demiş.
+Padişahın oğlu, bu cevaba gülüp geçmiş ama bir taraftan da kızı çok beğenmiş. Her avdan dönüşünde de tütün tarlasının önünden geçip tütüncü kızına seslenirmiş. Tütüncü kızı da ona aynı şekilde cevap verirmiş.
+Padişah, oğlunun sürekli ava gitmesinden şikâyetçiymiş. Onun sarayda kalması ve ülkeyi yönetmesi için bir çare arar dururmuş. Bir gün hanımına:
+— Hanım, biz bu oğlanı evlendirirsek belki av merakı azalır. Ben de onu ülke yönetimine alıştırırım, demiş.
+Bunlar çevreyi araştırmışlar. Hem güzel hem zeki hem de asil bir kız aramışlar. Padişah ve hanımı bir gün gezintiye çıkmışlar. Yolları da bir tütün tarlasından geçmiş. Padişahın hanımı tütüncü kızı uzaktan görmüş, beğenmiş. Kızın babasından kızlarını istemişler. Tütüncü baba kızına bu evliliği isteyip istemediğini sormuş. Kızın gönlü zaten oğlandaymış ama oğlanın kendisine kız istendiğinden haberi bile yokmuş. Kızın babası:
+— Padişahım oğlunuzun rızası olmadan kızımı oğlunuza veremem, demiş.
+Bunun üzerine padişah:
+— Eğer kabul ederseniz, sizi yarın yemeğe davet edelim. Sarayda birlikte bir yemek yiyelim. Oğlum da gelir. Eğer oğlum da kızınızla evlenmek isterse bu işi tatlıya bağlayalım, demiş.
+Tütüncü ve kızı bu teklifi kabul etmişler. Ertesi sabah padişah oğluna:
+— Oğlum sana uygun bir kız bulduk, annenle ben çok beğendik. Akşam onları da yemeğe davet ettik, senin de bizimle yemek yemeni istiyoruz. Eğer sen de kızı beğenirsen düğününüzü yapalım, demiş.
+Akşam olmuş, tütüncü ile kızı yemeğe gelmiş. Padişahın oğlu yemek masasında tütüncü kızını görünce çok şaşırmış. Hayret ve sevinçle:
+— Bu nasıl olur, demiş.
+Tütüncü kızı da masada:
+— Ben seni senden değil, yüce Mevla’mdan istemiştim unuttun mu, demiş.
+Oğlan kızın söylediklerine gülmüş. Onun da gönlü zaten tütüncü kızındaymış. Padişah oğluyla kızı evlendirmiş. Kırk gün kırk gece düğün yapılmış. Padişahın oğlu artık avda çok vakit geçirmiyor, yönetimle ilgileniyormuş. Hem sevenler birbirine kavuşmuş hem de padişah mutlu olmuş. Onlar ermiş muradına biz çıkalım kerevetine.`,
+        gorsel: "images/image6.jpeg"
+      },
+      {
+        id: 7,
+        kod: "★ MASAL 07",
+        baslik: "Tasa Kuşu",
+        tur: "Hayvan Masalı",
+        ozet: "Kederlerin ve kaygıların insan hayatındaki yerini simgeleyen; yüzleşme ve kabullenişle feraha çıkaran derin anlatı.",
+        metin: `Bir varmış, bir yokmuş. Bir ülkede, çok sevdiği bir kızı olan adaletli bir padişah yaşarmış. Hanım Sultan, sarayda her istediği yapıldığı için tasa nedir, dert nedir bilmeden büyümüş. Bir gün hocalarından biri ona tasalarının olduğunu söyleyince Sultan, “Tasa nasıl bir şeydir?” diye sormuş.
+Buna içerleyen hoca, Sultan’a bir tasa kuşu satın almış. Kuşu gören Sultan çok sevinmiş. Bir gün bahçede kuşun kafesini açınca kuş dile gelmiş ve biraz uçmak için izin istemiş. Sultan onu serbest bırakmış. Ancak kuş aniden Sultan’ı pençelerine alıp uzak bir dağın tepesine bırakmış.
+Kuş, Sultan’a kötülük yapmaya devam edeceğini söyleyip uçup gitmiş. Kimsesiz kalan Sultan, bir çobanın yardımıyla erkek kılığına girip bir köy kahvesinde çırak olarak çalışmaya başlamış. Fakat her gece tasa kuşu gelip dükkândaki eşyaları kırıp dökmüş. Sabah olduğunda ustası bütün zararı Sultan’dan bilip onu kovmuş.
+Sultan daha sonra bir terzi ve bir avizecinin yanında çalışmış. Ancak tasa kuşu bu dükkânlara da gelerek kumaşları parçalamış, avizeleri kırmış. Sultan her seferinde suçlanıp işinden olmuş. Sonunda ormana gitmiş ve geceyi bir ağacın üzerinde geçirmiş.
+O sırada ava çıkan bir şehzade, ağaçta gördüğü Sultan’ı yanına alıp saraya götürmüş. Sultan ile şehzade birbirlerine âşık olmuşlar ve evlenmeye karar vermişler.
+Düğün hazırlıkları sırasında tasa kuşu yeniden ortaya çıkmış. Sultan korkuyla ağlamaya başlayınca kuş kendini havuza atmış ve yakışıklı bir delikanlıya dönüşmüş. Delikanlı, annesinin bedduası yüzünden kuş kılığına girdiğini, Sultan’ın sabrı ve sevgisi sayesinde büyünün bozulduğunu anlatmış.
+Böylece Sultan ve şehzade muratlarına ermiş, düğünlerini kırk gün kırk gece kutlamışlar.`,
+        gorsel: "images/image7.jpeg"
+      },
+      {
+        id: 8,
+        kod: "★ MASAL 08",
+        baslik: "Sihirli Çeşme",
+        tur: "Olağanüstü",
+        ozet: "Kervan yollarının ortasındaki asırlık taştan oluktan süzülen; yolcunun niyetine göre tat veren kadim pınarın sırrı.",
+        metin: `Bir varmış, bir yokmuş. Uzak ülkelerden birinin küçük bir köyünde, içenin kalbine göre güzelleştiği ya da çirkinleştiği sihirli bir çeşme varmış. Bu yüzden köylüler çeşmenin suyundan içmeye korkarmış.
+Günlerden bir gün, ülkesindeki padişahın zulmünden kaçan bir delikanlı bu köye gelmiş. Çok yorulduğu için bir ağacın altında uykuya dalmış. Rüyasında dünyalar güzeli bir kız görmüş. Kız ona, “Gel, beni bu büyülü ormandan kurtar,” demiş.
+Uykusunu alıp yoluna devam eden delikanlı, köy meydanındaki çeşmeden kana kana su içmiş. Kalbi temiz olduğu için yüzü güzelleşmiş. Köyün zenginlerinden biri bunu görünce delikanlıya yaklaşmış ve kızının bir yaşlı kadın tarafından kaçırıldığını anlatmış. Kadın, sihirli çeşmeden içtiği için çirkinleşmiş ve kızını dağın ardındaki büyülü ormana hapsetmiş. Ormana yalnızca kalbi temiz olanlar girebiliyormuş. Zengin adam, kızını kurtarması karşılığında delikanlıya servetini vermeyi teklif etmiş.
+Delikanlı, kızı kurtarırsa onunla evlenmesine izin verilmesini şart koşmuş. Zengin adam da bunu kabul etmiş.
+Delikanlı günler sonra büyülü ormana ulaşmış. Yolda ayaklarına bir sarmaşık dolanmış. Sarmaşık dile gelerek ona neden orada olduğunu sormuş. Delikanlı, bir kızı kurtarmaya geldiğini söylemiş. Sarmaşık, delikanlının güzelliğini görünce sihirli sudan istemiş. Delikanlı ise ona, “Kimi üzdüysen sevindir, kalbini temizle. Kalbin güzelleşince suyu içersen eskisinden de güzel olursun,” demiş.
+Bu sözler üzerine sarmaşık, çirkin yaşlı kadına dönüşmüş. Kadın, yeniden güzelleşmek için delikanlıdan yardım istemiş. Delikanlı ona ormandaki büyüyü kaldırmasını, kaybolan gençleri serbest bırakmasını, dürüst ve iyi niyetli olmasını söylemiş.
+Yaşlı kadın büyüyü kaldırmış, kaybolan gençlerin evlerine dönmesini sağlamış ve bir daha yalan söylememeye söz vermiş. Delikanlı ona sihirli sudan vermiş. Kadın suyu içtikçe güzelleşip gençleşmiş. Ardından hapsettiği kızı mağaradan çıkararak delikanlıya teslim etmiş.
+Delikanlı, rüyasında gördüğü kızı karşısında görünce çok şaşırmış. Birlikte köye dönmüşler. Köylüler onları davul zurnayla karşılamış. Zengin adam sözünü tutarak kızını delikanlıya vermiş. Düğünleri yapılmış ve mutlu bir hayat sürmüşler.`,
+        gorsel: "images/image8.jpeg"
+      }
+    ];
+
+    // DOM Seçicileri
+    const storyGrid = document.getElementById("storyGrid");
+    const searchInput = document.getElementById("searchInput");
+    const noResults = document.getElementById("noResults");
+    const filterBtns = document.querySelectorAll(".filter-btn");
+
+    const readerDialog = document.getElementById("readerDialog");
+    const closeDialogBtn = document.getElementById("closeDialogBtn");
+    const modalImg = document.getElementById("modalImg");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalGenre = document.getElementById("modalGenre");
+    const modalNo = document.getElementById("modalNo");
+    const modalStoryContent = document.getElementById("modalStoryContent");
+
+    let currentFilter = "all";
+
+    // İnternetsiz çalışma kuralı için dahili SVG görsel üretici
+    function getFallbackImage(title) {
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400"><rect width="600" height="400" fill="%23000181"/><circle cx="150" cy="120" r="3" fill="%23D0FFA4"/><circle cx="480" cy="90" r="2.5" fill="%2383E7FF"/><circle cx="510" cy="280" r="3" fill="%23E8A0FF"/><circle cx="300" cy="200" r="90" fill="%23E8A0FF" opacity="0.25"/><text x="50%" y="50%" font-family="sans-serif" font-size="26" font-weight="bold" fill="%23E8A0FF" dominant-baseline="middle" text-anchor="middle">${encodeURIComponent(title)}</text></svg>`;
+    }
+
+    // Masalları DOM'a basma fonksiyonu (Türkçe karakter duyarlı)
+    function renderStories() {
+      const searchTerm = searchInput.value.toLocaleLowerCase("tr-TR").trim();
+      storyGrid.innerHTML = "";
+      let count = 0;
+
+      masallar.forEach(masal => {
+        const matchesSearch = masal.baslik.toLocaleLowerCase("tr-TR").includes(searchTerm) ||
+                              masal.ozet.toLocaleLowerCase("tr-TR").includes(searchTerm);
+        const matchesFilter = (currentFilter === "all") || (masal.tur === currentFilter);
+
+        if (matchesSearch && matchesFilter) {
+          count++;
+          const card = document.createElement("article");
+          card.className = "story-card";
+          card.tabIndex = 0;
+          card.setAttribute("role", "button");
+          card.setAttribute("aria-label", `${masal.baslik} masalını oku`);
+
+          card.innerHTML = `
+            <div class="card-img-container">
+              <span class="card-tag">${masal.tur}</span>
+              <img src="${masal.gorsel}" alt="${masal.baslik}" onerror="this.onerror=null; this.src=getFallbackImage('${masal.baslik}');" loading="lazy">
+            </div>
+            <div class="card-content">
+              <span class="card-no">${masal.kod}</span>
+              <h3>${masal.baslik}</h3>
+              <p class="card-excerpt">${masal.ozet}</p>
+              <span class="card-action">Masalı Keşfet &rarr;</span>
+            </div>
+          `;
+
+          // Tıklama ve klavye etkileşimi
+          card.addEventListener("click", () => openReader(masal));
+          card.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              openReader(masal);
+            }
+          });
+
+          storyGrid.appendChild(card);
+        }
+      });
+
+      noResults.style.display = count === 0 ? "block" : "none";
+    }
+
+    // Okuma modalını açma
+    function openReader(masal) {
+      modalTitle.textContent = masal.baslik;
+      modalGenre.textContent = masal.tur;
+      modalNo.textContent = masal.kod;
+      modalStoryContent.textContent = masal.metin;
+      modalImg.src = masal.gorsel;
+      modalImg.onerror = () => { modalImg.src = getFallbackImage(masal.baslik); };
+
+      readerDialog.showModal();
+    }
+
+    // Modal kapatma
+    closeDialogBtn.addEventListener("click", () => readerDialog.close());
+
+    readerDialog.addEventListener("click", (e) => {
+      const rect = readerDialog.getBoundingClientRect();
+      const inDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+                        rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+      if (!inDialog) readerDialog.close();
+    });
+
+    // Arama dinleyicisi
+    searchInput.addEventListener("input", renderStories);
+
+    // Filtreleme dinleyicileri
+    filterBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        filterBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilter = btn.dataset.filter;
+        renderStories();
+      });
+    });
+
+    // İlk yükleme
+    renderStories();
+  </script>
+</body>
+</html>
