@@ -1,0 +1,444 @@
+/* ==========================================================================
+0. YEREL YAZI TİPİ TANIMI (KiwiSoda)
+   İnternetsiz çalışma gereksinimi için fonts/ klasöründen çekilir.
+   ========================================================================== */
+@font-face {
+  font-family: 'KiwiSoda';
+  src: url('fonts/KiwiSoda.ttf') format('truetype'),
+       url('fonts/KiwiSoda.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ==========================================================================
+1. GÖKYÜZÜ & PEMBE-LEYLAK PALETİ (CSS DEĞİŞKENLERİ)
+   ========================================================================== */
+:root {
+  --night-skies: #000181;       /* Arka Plan */
+  --blue-raspberry: #006EE9;    /* Butonlar & Vurgu Etiketleri */
+  --sunny-skies: #83E7FF;       /* Çerçeve Işıltıları & İkincil Metin */
+  --violet: #E8A0FF;            /* Kart Çerçeveleri & Rozetler */
+  --powdered-lime: #D0FFA4;     /* Başlıklar & Masal Numaraları */
+
+  --card-bg-pink: #f7dfff;      /* Açık Leylak/Pembe Kart Zemini */
+  --card-text-dark: #120042;    /* Pembe zemin üzeri koyu mor okuma metni */
+  --card-text-muted: #3b2866;   /* İkincil özet metin rengi */
+
+  --radius: 18px;
+  --transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--night-skies);
+  color: #FFFFFF;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  /* Masalsı gökyüzü nebulaları */
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(131, 231, 255, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 85% 30%, rgba(232, 160, 255, 0.18) 0%, transparent 40%),
+    radial-gradient(circle at 50% 85%, rgba(0, 110, 233, 0.25) 0%, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* ==========================================================================
+2. ÜST BİLGİ ALANI (HEADER)
+   ========================================================================== */
+header {
+  text-align: center;
+  padding: 60px 20px 40px;
+  border-bottom: 1px solid rgba(131, 231, 255, 0.25);
+}
+
+.badge-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(232, 160, 255, 0.15);
+  border: 1.5px solid var(--violet);
+  color: var(--violet);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 30px;
+  margin-bottom: 16px;
+  box-shadow: 0 0 15px rgba(232, 160, 255, 0.3);
+}
+
+header h1 {
+  font-family: 'KiwiSoda', Georgia, sans-serif;
+  font-size: clamp(32px, 6vw, 60px);
+  font-weight: normal;
+  color: var(--powdered-lime);
+  text-shadow: 0 0 20px rgba(208, 255, 164, 0.35);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+header p {
+  max-width: 540px;
+  margin: 0 auto;
+  color: var(--sunny-skies);
+  font-size: 16px;
+}
+
+/* ==========================================================================
+3. KONTROL PANELİ (ARAMA & FİLTRELER)
+   ========================================================================== */
+main {
+  flex: 1;
+  max-width: 1220px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 22px 60px;
+}
+
+.controls-panel {
+  max-width: 620px;
+  margin: 0 auto 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#searchInput {
+  width: 100%;
+  padding: 15px 22px;
+  background: rgba(0, 1, 129, 0.7);
+  border: 2px solid var(--violet);
+  border-radius: 35px;
+  color: #FFFFFF;
+  font-size: 15.5px;
+  outline: none;
+  backdrop-filter: blur(8px);
+  transition: var(--transition);
+}
+
+#searchInput::placeholder {
+  color: rgba(232, 160, 255, 0.7);
+}
+
+#searchInput:focus {
+  border-color: var(--sunny-skies);
+  box-shadow: 0 0 20px rgba(131, 231, 255, 0.45);
+}
+
+.filter-tags {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: rgba(0, 110, 233, 0.25);
+  border: 1.5px solid var(--sunny-skies);
+  color: var(--sunny-skies);
+  padding: 7px 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background: var(--violet);
+  border-color: var(--violet);
+  color: var(--card-text-dark);
+  box-shadow: 0 0 16px rgba(232, 160, 255, 0.6);
+}
+
+/* ==========================================================================
+4. MASAL KARTLARI (GRID & KART DÜZENİ)
+   ========================================================================== */
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 26px;
+}
+
+.story-card {
+  background: var(--card-bg-pink);
+  color: var(--card-text-dark);
+  border: 2px solid var(--violet);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), 0 0 20px rgba(232, 160, 255, 0.2);
+  transition: var(--transition);
+  position: relative;
+}
+
+.story-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--sunny-skies);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.5), 0 0 25px rgba(131, 231, 255, 0.5);
+}
+
+.story-card:focus-visible {
+  outline: 3px solid var(--powdered-lime);
+  outline-offset: 4px;
+}
+
+.card-img-container {
+  width: 100%;
+  height: 190px;
+  background: #00024d;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 2px solid var(--violet);
+}
+
+.card-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+  display: block;
+}
+
+.story-card:hover .card-img-container img {
+  transform: scale(1.08);
+}
+
+.card-tag {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--night-skies);
+  border: 1px solid var(--sunny-skies);
+  color: var(--sunny-skies);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.card-content {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-no {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--blue-raspberry);
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+.card-content h3 {
+  font-family: 'KiwiSoda', Georgia, sans-serif;
+  font-size: 24px;
+  color: var(--card-text-dark);
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.card-excerpt {
+  font-size: 13.5px;
+  color: var(--card-text-muted);
+  line-height: 1.6;
+  margin-bottom: 18px;
+  flex: 1;
+}
+
+.card-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--blue-raspberry);
+  margin-top: auto;
+  transition: var(--transition);
+}
+
+.story-card:hover .card-action {
+  color: #000181;
+  transform: translateX(5px);
+}
+
+#noResults {
+  display: none;
+  text-align: center;
+  padding: 50px 20px;
+  font-size: 17px;
+  color: var(--violet);
+}
+
+/* ==========================================================================
+5. OKUMA PENCERESİ (MODAL DIALOG)
+   ========================================================================== */
+dialog#readerDialog {
+  width: min(780px, calc(100% - 32px));
+  max-height: 85vh;
+  margin: auto;
+  border: 3px solid var(--violet);
+  border-radius: 20px;
+  background: var(--card-bg-pink);
+  color: var(--card-text-dark);
+  box-shadow: 0 0 50px rgba(232, 160, 255, 0.45), 0 20px 60px rgba(0, 0, 0, 0.85);
+  overflow-y: auto;
+  padding: 0;
+}
+
+dialog#readerDialog::backdrop {
+  background: rgba(0, 1, 70, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.reader-header {
+  position: relative;
+  height: 250px;
+  background-color: #000181;
+  border-bottom: 2px solid var(--violet);
+}
+
+.reader-header img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.dialog-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  background: var(--night-skies);
+  border: 1.5px solid var(--sunny-skies);
+  color: var(--sunny-skies);
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: var(--transition);
+  z-index: 5;
+}
+
+.dialog-close-btn:hover {
+  background: var(--violet);
+  color: var(--night-skies);
+  transform: scale(1.1);
+}
+
+.reader-body {
+  padding: 32px 35px 40px;
+}
+
+.reader-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.reader-genre {
+  background: var(--night-skies);
+  border: 1px solid var(--violet);
+  color: var(--violet);
+  font-size: 11.5px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 14px;
+}
+
+.reader-body h2 {
+  font-family: 'KiwiSoda', Georgia, sans-serif;
+  font-size: clamp(26px, 4vw, 36px);
+  color: var(--card-text-dark);
+  margin-bottom: 20px;
+}
+
+.reader-text {
+  font-size: 16.5px;
+  line-height: 1.9;
+  color: #1a083d;
+  margin-bottom: 28px;
+  white-space: pre-line;
+  max-width: 68ch;
+}
+
+/* ==========================================================================
+6. KAYNAKÇA & ALT BİLGİ (FOOTER)
+   ========================================================================== */
+.reference-section {
+  background: rgba(0, 1, 129, 0.7);
+  border-top: 1px solid rgba(131, 231, 255, 0.2);
+  border-bottom: 1px solid rgba(131, 231, 255, 0.2);
+  padding: 45px 20px;
+}
+
+.reference-inner {
+  max-width: 950px;
+  margin: 0 auto;
+}
+
+.reference-inner h2 {
+  font-family: 'KiwiSoda', Georgia, serif;
+  font-size: 26px;
+  color: var(--powdered-lime);
+  margin-bottom: 16px;
+}
+
+.ref-list {
+  list-style-type: decimal;
+  list-style-position: inside;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ref-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 5px;
+}
+
+.ref-desc {
+  color: var(--sunny-skies);
+  font-size: 13px;
+}
+
+footer {
+  text-align: center;
+  padding: 28px 20px;
+  background: #000154;
+  font-size: 13.5px;
+  color: var(--sunny-skies);
+  border-top: 1px solid rgba(131, 231, 255, 0.1);
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .reader-body { padding: 22px 18px; }
+  .reader-header { height: 180px; }
+  header { padding: 45px 16px 30px; }
+}
